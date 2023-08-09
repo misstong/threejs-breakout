@@ -5,7 +5,7 @@ import path from 'path'
 const dirname = path.resolve()
 
 export default defineConfig({
-    root: 'sources',
+    root: 'src',
     publicDir: '../public',
     build:
     {
