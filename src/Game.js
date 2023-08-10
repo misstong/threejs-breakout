@@ -5,18 +5,20 @@ import SpriteRenderer from './SpriteRenderer.js'
 
 class Game {
 	constructor(_options = {}) {
-		this.width = _options.width || 1280
-		this.height = _options.height || 720
+		this.width = _options.width || 800
+		this.height = _options.height || 600
 		this.targetElement = _options.targetElement
 		this.setScene()
 		this.setCamera()
 		this.setRenderer()
+		this.init()
 		this.update()
+		
 	}
 
 	init() {
 		this.background = new SpriteRenderer(this.scene)
-		this.background.drawSprite('resources/textures/backgroud.jpg', {
+		this.background.drawSprite('resources/textures/background.jpg', {
 			x: 0,
 			y: 0,
 			z: 0
@@ -30,11 +32,11 @@ class Game {
 	setScene()
 	{
 		this.scene = new THREE.Scene()
-		        const cube = new THREE.Mesh(
-            new THREE.BoxGeometry(1, 1, 1),
-             new THREE.MeshBasicMaterial( { color: 0x00ff00 } )
-        )
-        this.scene.add(cube)      
+		    //     const cube = new THREE.Mesh(
+        //     new THREE.BoxGeometry(1, 1, 1),
+        //      new THREE.MeshBasicMaterial( { color: 0x00ff00 } )
+        // )
+        // this.scene.add(cube)      
 	}
 
 		setCamera()
