@@ -9,7 +9,7 @@ export default class SpriteRenderer{
 		const material = new THREE.SpriteMaterial( { map: map } );
 		const sprite = new THREE.Sprite(material);
 		sprite.position.set(position.x, position.y, position.z);
-		sprite.scale.set(size.x, size.y, size.z);
+		sprite.scale.set(size.x, size.y, 1);
 		this.scene.add(sprite)
 		
 	}
