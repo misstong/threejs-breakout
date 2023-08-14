@@ -17,12 +17,16 @@ const Direction ={
     DOWN: 2,
     LEFT: 3
 };
+
+const PLAYER_VELOCITY = 500;
 class Game {
 	constructor(_options = {}) {
 		this.width = _options.width || 800
 		this.height = _options.height || 600
 		this.targetElement = _options.targetElement
-
+		this.state = GameState.GAME_ACTIVE
+		this.Keys = {} // 表示当前什么键被按下
+		this.KeysProcessed = {} // 表示键是否被处理过，适用于只需要处理一次的case
 		this.setScene()
 		this.setCamera()
 		this.setRenderer()
@@ -83,14 +87,56 @@ class Game {
 	
 	}
 
-	processInput() {
-		document.addEventListener('keydown', (event) => {
-		
+	addEventListener() {
+			document.addEventListener('keydown', (event) => {
+			switch (event.code) {
+				case 'KeyA':
+					this.Keys['a'] = true
+					break
+				case 'KeyD':
+					this.Keys['d'] = true
+					break
+				case 'Space':
+					this.Keys['space'] = true
+					break
+				case 'Enter':
+					this.Keys['enter'] = true
+					break
+				default:
+					break
+			}
 		})
 
 		document.addEventListener('keyup', (event) => {
-		
+			switch (event.code) {
+				case 'KeyA':
+				case 'KeyD':
+				case 'Space':
+				case 'Enter':
+					this.Keys[event.code] = false
+					this.KeysProcessed[event.code] = false
+					break
+
+				default:
+					break
+			}
 		})
+	}
+
+	processInput(dt) {
+		if (this.state === GameState.GAME_ACTIVE) {
+			const velocity = PLAYER_VELOCITY * dt;
+			if (this.Keys['KeyA']) {
+				if (this.player.position.x >= 0) {
+					this.player.update(-velocity)
+				}
+			}
+			if (this.Keys['KeyD']) {
+				if (this.player.position.x <= this.width - this.player.size.x) {
+						this.player.update(velocity)
+				}
+			}
+		}
 	}
 
 }

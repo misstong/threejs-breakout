@@ -13,8 +13,9 @@ export default class GameObject {
 		this.isDestroyed = false
 		this.draw()
 	}
-	update() {
-
+	update(dx) {
+		this.position.x += dx;
+		this.scene.position.x += dx
 	}
 	draw() {
 		this.spriteRenderer.drawSprite(this.texture, this.position, this.size)
