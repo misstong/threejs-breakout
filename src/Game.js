@@ -23,6 +23,7 @@ class Game {
 	constructor(_options = {}) {
 		this.width = _options.width || 800
 		this.height = _options.height || 600
+		console.log('-----', this.width, this.height)
 		this.targetElement = _options.targetElement
 		this.state = GameState.GAME_ACTIVE
 		this.Keys = {} // 表示当前什么键被按下
@@ -36,6 +37,11 @@ class Game {
 	}
 
 	init() {
+		const geometry = new THREE.BoxGeometry( 100, 100, 100 );
+const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+		const cube = new THREE.Mesh(geometry, material);
+		cube.position.set(0,0,0)
+this.scene.add( cube );
 		this.background = new SpriteRenderer(this.scene)
 		this.background.drawSprite('resources/textures/background.jpg', {
 			x: 0,
@@ -46,9 +52,11 @@ class Game {
 			y: this.height,
 			z: 1
 		})
-		this.PLAYER_SIZE = {x : 100, y: 20 }
-		this.player = new GameObject({ x: this.width / 2 - this.PLAYER_SIZE.x / 2, y: this.height - this.PLAYER_SIZE.y },
-			this.PLAYER_SIZE, {x: 0, y: 0}, 'resources/textures/paddle.jpg', this.scene
+		this.PLAYER_SIZE = { x: 100, y: 20 }
+		const playerPos = { x: this.width / 2 - this.PLAYER_SIZE.x / 2, y: this.height - this.PLAYER_SIZE.y }
+		console.log('------player pos', playerPos)
+		this.player = new GameObject(playerPos,
+			this.PLAYER_SIZE, {x: 0, y: 0}, 'resources/textures/paddle.png', this.scene
 		)
 	}
 
@@ -66,7 +74,7 @@ class Game {
 	{
 			this.camera = new Camera({
 				position: {
-					x: 1, y: 1, z: 5
+					x: 0, y: 0, z: 1100
 				}
 			})
 	}
@@ -74,7 +82,7 @@ class Game {
     setRenderer()
     {
         this.renderer = new Renderer({ rendererInstance: this.rendererInstance })
-
+				// this.renderer.get().setViewport(0,0,this.width,this.height)
         this.targetElement.appendChild(this.renderer.getDomElement())
     }
 

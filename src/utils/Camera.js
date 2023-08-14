@@ -36,7 +36,7 @@ export default class Camera {
     const HEIGHT = window.innerHeight
 
     this.camera.aspect = WIDTH / HEIGHT
-    this.setZ(window.innerHeight / getZRatio())
+    // this.setZ(window.innerHeight / getZRatio())
     this.camera.updateProjectionMatrix()
 	}
 	setUp (x, y, z) {
