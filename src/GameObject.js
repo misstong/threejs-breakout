@@ -15,7 +15,7 @@ export default class GameObject {
 	}
 	update(dx) {
 		this.position.x += dx;
-		this.scene.position.x += dx
+		this.spriteRenderer.sprite.position.x += dx
 	}
 	draw() {
 		this.spriteRenderer.drawSprite(this.texture, this.position, this.size)

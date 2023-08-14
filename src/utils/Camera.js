@@ -21,7 +21,7 @@ export default class Camera {
     position = {
       x: 0, y: 0, z: 0
     },
-    up = [0, 0, 1]
+    up = [0, 1, 0]
 	}) {
 		this.camera = new THREE.PerspectiveCamera(fov, aspectRatio, near, far)
 		this.up = up

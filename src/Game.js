@@ -18,6 +18,12 @@ const Direction ={
     LEFT: 3
 };
 
+const transPos = (width, height, pos) => {
+	const x = pos.x - width / 2;
+	const y = pos.y - height / 2;
+	return {x, y: -y}
+}
+
 const PLAYER_VELOCITY = 500;
 class Game {
 	constructor(_options = {}) {
@@ -28,10 +34,13 @@ class Game {
 		this.state = GameState.GAME_ACTIVE
 		this.Keys = {} // 表示当前什么键被按下
 		this.KeysProcessed = {} // 表示键是否被处理过，适用于只需要处理一次的case
+		this.clock = new THREE.Clock()
+		this.clock.start()
 		this.setScene()
 		this.setCamera()
 		this.setRenderer()
 		this.init()
+		this.addEventListener()
 		this.update()
 		
 	}
@@ -41,7 +50,7 @@ class Game {
 const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
 		const cube = new THREE.Mesh(geometry, material);
 		cube.position.set(0,0,0)
-this.scene.add( cube );
+		this.scene.add( cube );
 		this.background = new SpriteRenderer(this.scene)
 		this.background.drawSprite('resources/textures/background.jpg', {
 			x: 0,
@@ -53,9 +62,8 @@ this.scene.add( cube );
 			z: 1
 		})
 		this.PLAYER_SIZE = { x: 100, y: 20 }
-		const playerPos = { x: this.width / 2 - this.PLAYER_SIZE.x / 2, y: this.height - this.PLAYER_SIZE.y }
-		console.log('------player pos', playerPos)
-		this.player = new GameObject(playerPos,
+		const playerPos = { x: this.width / 2 , y: this.height - this.PLAYER_SIZE.y }
+		this.player = new GameObject(transPos(this.width, this.height,playerPos),
 			this.PLAYER_SIZE, {x: 0, y: 0}, 'resources/textures/paddle.png', this.scene
 		)
 	}
@@ -90,6 +98,8 @@ this.scene.add( cube );
 		if (this.renderer) {
 			this.renderer.render(this.scene, this.camera.get())
 		}
+		const dt = this.clock.getDelta()
+		this.processInput(dt) 
 
 		requestAnimationFrame(this.update.bind(this))
 	
@@ -97,19 +107,14 @@ this.scene.add( cube );
 
 	addEventListener() {
 			document.addEventListener('keydown', (event) => {
-			switch (event.code) {
-				case 'KeyA':
-					this.Keys['a'] = true
+				switch (event.code) {
+					case 'KeyA':
+					case 'KeyD':
+					case 'Space':
+					case 'Enter':
+						this.Keys[event.code] = true
 					break
-				case 'KeyD':
-					this.Keys['d'] = true
-					break
-				case 'Space':
-					this.Keys['space'] = true
-					break
-				case 'Enter':
-					this.Keys['enter'] = true
-					break
+
 				default:
 					break
 			}
@@ -135,12 +140,12 @@ this.scene.add( cube );
 		if (this.state === GameState.GAME_ACTIVE) {
 			const velocity = PLAYER_VELOCITY * dt;
 			if (this.Keys['KeyA']) {
-				if (this.player.position.x >= 0) {
+				if (this.player.position.x >= 0 - this.width /2 + this.PLAYER_SIZE.x /2 ) {
 					this.player.update(-velocity)
 				}
 			}
 			if (this.Keys['KeyD']) {
-				if (this.player.position.x <= this.width - this.player.size.x) {
+				if (this.player.position.x <= this.width/2 - this.player.size.x/2) {
 						this.player.update(velocity)
 				}
 			}
