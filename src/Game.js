@@ -123,6 +123,7 @@ class Game {
 		if (this.renderer) {
 			this.renderer.render(this.scene, this.camera.get())
 		}
+		this.levels[this.level].update()
 		const dt = this.clock.getDelta()
 		this.processInput(dt) 
 		this.ball.move(dt, this.width, HEIGHT)

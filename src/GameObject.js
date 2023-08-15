@@ -11,6 +11,7 @@ export default class GameObject {
 		this.spriteRenderer = new SpriteRenderer(scene)
 		this.solid = false
 		this.isDestroyed = false
+		this.physicallyRemoved = false
 		this.draw()
 	}
 	update(delta) {
@@ -38,8 +39,12 @@ export default class GameObject {
 	}
 
 	destroy() {
+		if (this.physicallyRemoved) {
+			return
+		}
 		if (this.isDestroyed) {
 			this.scene.remove(this.spriteRenderer.sprite)
+				this.physicallyRemoved = true
 		}
 	}
 }
