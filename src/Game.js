@@ -25,10 +25,14 @@ const transPos = (width, height, pos) => {
 	return {x, y: -y}
 }
 
+
+
+export const WIDTH = 800
+export const HEIGHT = 600
 const PLAYER_VELOCITY = 500;
 const BALL_RADIUS = 12
 
-const INITIAL_BALL_VELOCITY = { x: 100, y: -350.0 };
+const INITIAL_BALL_VELOCITY = { x: 100, y: 350.0 };
 class Game {
 	constructor(_options = {}) {
 		this.width = _options.width || 800
@@ -50,11 +54,11 @@ class Game {
 	}
 
 	init() {
-		const geometry = new THREE.BoxGeometry( 100, 100, 100 );
-const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-		const cube = new THREE.Mesh(geometry, material);
-		cube.position.set(0,0,0)
-		this.scene.add( cube );
+// 		const geometry = new THREE.BoxGeometry( 100, 100, 100 );
+// const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+// 		const cube = new THREE.Mesh(geometry, material);
+// 		cube.position.set(0,0,0)
+// 		this.scene.add( cube );
 		this.background = new SpriteRenderer(this.scene)
 		this.background.drawSprite('resources/textures/background.jpg', {
 			x: 0,
@@ -107,7 +111,7 @@ const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
 		}
 		const dt = this.clock.getDelta()
 		this.processInput(dt) 
-		this.ball.move(dt, this.width)
+		this.ball.move(dt, this.width, HEIGHT)
 		requestAnimationFrame(this.update.bind(this))
 	}
 
@@ -148,12 +152,21 @@ const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
 			if (this.Keys['KeyA']) {
 				if (this.player.position.x >= 0 - this.width /2 + this.PLAYER_SIZE.x /2 ) {
 					this.player.update(-velocity)
+					if (this.ball.stuck) {
+						this.ball.update(-velocity)
+					}
 				}
 			}
 			if (this.Keys['KeyD']) {
 				if (this.player.position.x <= this.width/2 - this.player.size.x/2) {
-						this.player.update(velocity)
+					this.player.update(velocity)
+								if (this.ball.stuck) {
+						this.ball.update(velocity)
+					}
 				}
+			}
+			if (this.Keys['Space']) {
+				this.ball.stuck = false
 			}
 		}
 	}
