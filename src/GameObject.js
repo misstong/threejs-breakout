@@ -13,9 +13,25 @@ export default class GameObject {
 		this.isDestroyed = false
 		this.draw()
 	}
-	update(dx) {
-		this.position.x += dx;
-		this.spriteRenderer.sprite.position.x += dx
+	update(delta) {
+		if (typeof delta === 'object') {
+			this.position.x += delta.x;
+			this.spriteRenderer.sprite.position.x += delta.x
+			this.position.y += delta.y;
+			this.spriteRenderer.sprite.position.y += delta.y
+		} else {
+			this.position.x += delta;
+			this.spriteRenderer.sprite.position.x += delta
+		}
+
+	}
+	setX(x) {
+		this.position.x = x;
+		this.spriteRenderer.sprite.position.x = x
+	}
+	setY(y) {
+		this.position.y = y;
+		this.spriteRenderer.sprite.position.y = y
 	}
 	draw() {
 		this.spriteRenderer.drawSprite(this.texture, this.position, this.size)

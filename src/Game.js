@@ -3,6 +3,7 @@ import Renderer from './utils/Renderer.js'
 import Camera from './utils/Camera.js'
 import SpriteRenderer from './SpriteRenderer.js'
 import GameObject from './GameObject.js'
+import BallObject from './BallObject.js'
 
 
 const  GameState = {
@@ -25,6 +26,9 @@ const transPos = (width, height, pos) => {
 }
 
 const PLAYER_VELOCITY = 500;
+const BALL_RADIUS = 12
+
+const INITIAL_BALL_VELOCITY = { x: 100, y: -350.0 };
 class Game {
 	constructor(_options = {}) {
 		this.width = _options.width || 800
@@ -66,6 +70,9 @@ const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
 		this.player = new GameObject(transPos(this.width, this.height,playerPos),
 			this.PLAYER_SIZE, {x: 0, y: 0}, 'resources/textures/paddle.png', this.scene
 		)
+
+		const ballPos = {x: playerPos.x, y: playerPos.y - this.PLAYER_SIZE.y/2 - BALL_RADIUS/2 }
+		this.ball = new BallObject(transPos(this.width, this.height,ballPos),BALL_RADIUS, INITIAL_BALL_VELOCITY,'resources/textures/awesomeface.png',this.scene)
 	}
 
 	setScene()
@@ -100,9 +107,8 @@ const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
 		}
 		const dt = this.clock.getDelta()
 		this.processInput(dt) 
-
+		this.ball.move(dt, this.width)
 		requestAnimationFrame(this.update.bind(this))
-	
 	}
 
 	addEventListener() {
