@@ -42,8 +42,11 @@ export default class GameObject {
 		if (this.physicallyRemoved) {
 			return
 		}
+		
 		if (this.isDestroyed) {
+			console.log('---game obj destroy', this.scene, this.spriteRenderer.sprite)
 			this.scene.remove(this.spriteRenderer.sprite)
+
 				this.physicallyRemoved = true
 		}
 	}

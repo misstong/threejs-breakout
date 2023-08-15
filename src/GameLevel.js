@@ -62,7 +62,8 @@ export default class GameLevel {
 	}
 	update() {
 		for (let tile of this.bricks) {
-			if (tile.isDestroyed) {
+			if (tile.isDestroyed && !tile.physicallyRemoved) {
+				console.log('gamelevle destry')
 				tile.destroy()
 			}
 		}

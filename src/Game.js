@@ -26,6 +26,65 @@ const transPos = (width, height, pos) => {
 	return {x, y: -y}
 }
 
+function clamp(v, low, high) {
+	return {
+		x: Math.max(low.x, Math.min(v.x, high.x)),
+		y: Math.max(low.y, Math.min(v.y, high.y))
+	};
+}
+
+function VectorDirection(target) {
+	const compass = [
+		{ x: 0, y: 1 },
+		{ x: 1, y: 0 },
+		{ x: 0, y: -1 },
+		{ x: -1, y: 0 }
+	]
+	let max = 0;
+	let best_match = -1;
+	for (let i = 0; i < 4; i++) {
+		let item = compass[i]
+		const dot_product = item.x * target.x + item.y * target.y;
+		if (dot_product > max) {
+			max = dot_product;
+			best_match = i;
+		}
+	}
+	return best_match;
+}
+
+function checkCollision(ball, other) {
+	const ballPos = ball.position;
+	const twoPos = other.position;
+
+	const aabbHalfSize = {
+		x: other.size.x / 2,
+			y: other.size.y / 2
+	}
+	const difference = {
+		x: ballPos.x - twoPos.x,
+		y: ballPos.y - twoPos.y
+	}
+
+	const clamped = clamp(difference, {x: -aabbHalfSize.x, y: -aabbHalfSize.y}, aabbHalfSize)
+	const closest = {
+		x: twoPos.x + clamped.x,
+		y: twoPos.y+clamped.y
+	}
+
+	const diff = {
+		x:  closest.x - ballPos.x,
+		y:  closest.y - ballPos.y
+	}
+
+	if (diff.x * diff.x + diff.y * diff.y < ball.radius * ball.radius) {
+		return [true, VectorDirection(diff), diff]
+	} else {
+		return [false,Direction.UP, {x:0,y:0} ]
+	}
+
+}
+
 
 
 export const WIDTH = 800
@@ -53,7 +112,7 @@ class Game {
 		this.init()
 		this.addEventListener()
 		this.update()
-		
+		console.log('---scene,', this.scene)
 	}
 
 	init() {
@@ -105,7 +164,7 @@ class Game {
         // this.scene.add(cube)      
 	}
 
-		setCamera()
+	setCamera()
 	{
 			this.camera = new Camera({
 				position: {
@@ -114,21 +173,40 @@ class Game {
 			})
 	}
 	
-    setRenderer()
-    {
-        this.renderer = new Renderer({ rendererInstance: this.rendererInstance })
-				// this.renderer.get().setViewport(0,0,this.width,this.height)
-        this.targetElement.appendChild(this.renderer.getDomElement())
-		}
+	setRenderer()
+	{
+			this.renderer = new Renderer({ rendererInstance: this.rendererInstance })
+			// this.renderer.get().setViewport(0,0,this.width,this.height)
+			this.targetElement.appendChild(this.renderer.getDomElement())
+	}
 	
+	doCollisions() {
+		for (let brick of this.levels[this.level].bricks) {
+			if (!brick.isDestroyed) {
+				const collision = checkCollision(this.ball, brick);
+				
+				if (collision[0]) {
+					console.log('------coloii', collision)
+					if (!brick.solid) {
+						brick.isDestroyed = true;
+						brick.destroy()
+
+					} else {
+						// to add effect
+					}
+				}
+			}
+		}
+	}
 
 	update() {
 		if (this.renderer) {
 			this.renderer.render(this.scene, this.camera.get())
 		}
-		if (this.levels.length) {
-			this.levels[this.level].update()
-		}
+		this.doCollisions()
+		// if (this.levels.length) {
+		// 	this.levels[this.level].update()
+		// }
 		
 		const dt = this.clock.getDelta()
 		this.processInput(dt) 
@@ -188,7 +266,8 @@ class Game {
 			}
 			if (this.Keys['Space']) {
 				this.ball.stuck = false
-			}
+				// this.scene.remove(this.player.spriteRenderer.sprite)
+			}	
 		}
 	}
 
