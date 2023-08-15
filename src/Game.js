@@ -4,7 +4,8 @@ import Camera from './utils/Camera.js'
 import SpriteRenderer from './SpriteRenderer.js'
 import GameObject from './GameObject.js'
 import BallObject from './BallObject.js'
-
+import GameLevel from './GameLevel.js'
+import { LEVEL1, LEVEL2, LEVEL3} from './levels/levels.js'
 
 const  GameState = {
 	GAME_ACTIVE: 0,
@@ -37,7 +38,8 @@ class Game {
 	constructor(_options = {}) {
 		this.width = _options.width || 800
 		this.height = _options.height || 600
-		console.log('-----', this.width, this.height)
+		this.levels = []
+		this.level = 0
 		this.targetElement = _options.targetElement
 		this.state = GameState.GAME_ACTIVE
 		this.Keys = {} // 表示当前什么键被按下
@@ -79,6 +81,17 @@ class Game {
 		this.ball = new BallObject(transPos(this.width, this.height,ballPos),BALL_RADIUS, INITIAL_BALL_VELOCITY,'resources/textures/awesomeface.png',this.scene)
 	}
 
+	readLevels() {
+		const one = new GameLevel(LEVEL1, this.width, this.height);
+		const two = new GameLevel(LEVEL2, this.width, this.height);
+		const three = new GameLevel(LEVEL3, this.width, this.height);
+
+		this.levels.push(one)
+		this.levels.push(two);
+		this.levels.push(three)
+		this.levels[this.level].draw()
+	}
+
 	setScene()
 	{
 		this.scene = new THREE.Scene()
@@ -103,7 +116,8 @@ class Game {
         this.renderer = new Renderer({ rendererInstance: this.rendererInstance })
 				// this.renderer.get().setViewport(0,0,this.width,this.height)
         this.targetElement.appendChild(this.renderer.getDomElement())
-    }
+		}
+	
 
 	update() {
 		if (this.renderer) {

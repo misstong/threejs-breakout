@@ -36,4 +36,10 @@ export default class GameObject {
 	draw() {
 		this.spriteRenderer.drawSprite(this.texture, this.position, this.size)
 	}
+
+	destroy() {
+		if (this.isDestroyed) {
+			this.scene.remove(this.spriteRenderer.sprite)
+		}
+	}
 }
