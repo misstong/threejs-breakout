@@ -131,16 +131,18 @@ class Game {
 			y: this.height,
 			z: 1
 		})
+		this.background.sprite.name = 'back'
 		this.PLAYER_SIZE = { x: 100, y: 20 }
 		const playerPos = { x: this.width / 2 , y: this.height - this.PLAYER_SIZE.y }
 		this.player = new GameObject(transPos(this.width, this.height,playerPos),
 			this.PLAYER_SIZE, {x: 0, y: 0}, 'resources/textures/paddle.png', this.scene
 		)
-
+		this.player.spriteRenderer.sprite.name = 'player'
 		this.readLevels()
 
 		const ballPos = {x: playerPos.x, y: playerPos.y - this.PLAYER_SIZE.y/2 - BALL_RADIUS/2 }
 		this.ball = new BallObject(transPos(this.width, this.height,ballPos),BALL_RADIUS, INITIAL_BALL_VELOCITY,'resources/textures/awesomeface.png',this.scene)
+		this.ball.spriteRenderer.sprite.name='ball'
 	}
 
 	readLevels() {
@@ -151,7 +153,6 @@ class Game {
 		this.levels.push(one)
 		// this.levels.push(two);
 		// this.levels.push(three)
-		this.levels[this.level].draw()
 	}
 
 	setScene()

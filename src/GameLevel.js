@@ -31,11 +31,13 @@ export default class GameLevel {
 					const obj = new GameObject(transPos(this.width,this.totalHeight, pos),size, {x: 0,y:0}, "resources/textures/block_solid.png", this.scene)
 					obj.solid = true
 					this.bricks.push(obj)
+						obj.spriteRenderer.sprite.name='brick'
 				} else if (this.tileData[y][x] > 1) {
 						const pos = { x: x * unit_width + unit_width /2, y: y * unit_height + unit_height/2 };
 					const size = {x: unit_width, y: unit_height}
 					const obj = new GameObject(transPos(this.width,this.totalHeight, pos),size, {x: 0,y:0}, "resources/textures/block.png", this.scene)
 					this.bricks.push(obj)
+					obj.spriteRenderer.sprite.name='brick'
 				}
 
 			}
@@ -52,14 +54,6 @@ export default class GameLevel {
 		return true
 	}
 
-	draw() {
-		console.log('-------this.br',this.bricks)
-		for (let tile of this.bricks) {
-			if (!tile.isDestroyed) {
-				tile.draw()
-			}
-		}
-	}
 	update() {
 		for (let tile of this.bricks) {
 			if (tile.isDestroyed && !tile.physicallyRemoved) {
