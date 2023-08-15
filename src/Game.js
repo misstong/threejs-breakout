@@ -49,6 +49,7 @@ class Game {
 		this.setScene()
 		this.setCamera()
 		this.setRenderer()
+		
 		this.init()
 		this.addEventListener()
 		this.update()
@@ -77,18 +78,20 @@ class Game {
 			this.PLAYER_SIZE, {x: 0, y: 0}, 'resources/textures/paddle.png', this.scene
 		)
 
+		this.readLevels()
+
 		const ballPos = {x: playerPos.x, y: playerPos.y - this.PLAYER_SIZE.y/2 - BALL_RADIUS/2 }
 		this.ball = new BallObject(transPos(this.width, this.height,ballPos),BALL_RADIUS, INITIAL_BALL_VELOCITY,'resources/textures/awesomeface.png',this.scene)
 	}
 
 	readLevels() {
-		const one = new GameLevel(LEVEL1, this.width, this.height);
-		const two = new GameLevel(LEVEL2, this.width, this.height);
-		const three = new GameLevel(LEVEL3, this.width, this.height);
+		const one = new GameLevel(LEVEL1, this.width, this.height/2,this.height, this.scene);
+		// const two = new GameLevel(LEVEL2, this.width, this.height/2,this.height,this.scene);
+		// const three = new GameLevel(LEVEL3, this.width, this.height/2, this.height,this.scene);
 
 		this.levels.push(one)
-		this.levels.push(two);
-		this.levels.push(three)
+		// this.levels.push(two);
+		// this.levels.push(three)
 		this.levels[this.level].draw()
 	}
 
@@ -123,7 +126,10 @@ class Game {
 		if (this.renderer) {
 			this.renderer.render(this.scene, this.camera.get())
 		}
-		this.levels[this.level].update()
+		if (this.levels.length) {
+			this.levels[this.level].update()
+		}
+		
 		const dt = this.clock.getDelta()
 		this.processInput(dt) 
 		this.ball.move(dt, this.width, HEIGHT)

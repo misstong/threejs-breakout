@@ -24,9 +24,9 @@ export default class BallObject extends GameObject {
 				this.setX(window_width - this.size.x)
 			}
 
-			if (this.position.y >= transformCoordinate(0, HEIGHT,true)) {
+			if (this.position.y >= transformCoordinate(this.radius, HEIGHT,true)) {
 				this.velocity.y = -this.velocity.y;
-				this.setY(transformCoordinate(0, HEIGHT,true))
+				this.setY(transformCoordinate(this.radius, HEIGHT,true))
 			}
 		}
 		return this.position

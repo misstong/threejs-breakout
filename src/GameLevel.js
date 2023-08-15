@@ -6,12 +6,14 @@ const transPos = (width, height, pos) => {
 	return {x, y: -y}
 }
 export default class GameLevel {
-	constructor(tileData, width, height, scene) {
+	constructor(tileData, width, height,totalHeight ,scene) {
 		this.scene = scene
 		this.tileData = tileData
 		this.width = width
 		this.height = height
+		this.totalHeight = totalHeight
 		this.bricks = []
+		this.init()
 	}
 
 	init() {
@@ -26,13 +28,13 @@ export default class GameLevel {
 				if (this.tileData[y][x] === 1) {
 					const pos = { x: x * unit_width + unit_width /2, y: y * unit_height + unit_height/2 };
 					const size = {x: unit_width, y: unit_height}
-					const obj = new GameObject(transPos(this.width,this.height, pos),size, {x: 0,y:0}, "resources/textures/block_solid.png", this.scene)
+					const obj = new GameObject(transPos(this.width,this.totalHeight, pos),size, {x: 0,y:0}, "resources/textures/block_solid.png", this.scene)
 					obj.solid = true
 					this.bricks.push(obj)
 				} else if (this.tileData[y][x] > 1) {
 						const pos = { x: x * unit_width + unit_width /2, y: y * unit_height + unit_height/2 };
 					const size = {x: unit_width, y: unit_height}
-					const obj = new GameObject(transPos(this.width,this.height, pos),size, {x: 0,y:0}, "resources/textures/block.png", this.scene)
+					const obj = new GameObject(transPos(this.width,this.totalHeight, pos),size, {x: 0,y:0}, "resources/textures/block.png", this.scene)
 					this.bricks.push(obj)
 				}
 
@@ -51,6 +53,7 @@ export default class GameLevel {
 	}
 
 	draw() {
+		console.log('-------this.br',this.bricks)
 		for (let tile of this.bricks) {
 			if (!tile.isDestroyed) {
 				tile.draw()
