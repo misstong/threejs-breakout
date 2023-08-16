@@ -88,12 +88,14 @@ export class ParticleGenerator{
 	respawnParticle(p, ball, offset) {
 		const random = Math.random() * 10 - 5;
 		const rColor = 0.5 + Math.random();
-				if (!p.initialized) {
+		if (!p.initialized) {
 			p.init()
 		}
 		p.life = 1
 		p.velocity.set(ball.velocity.x * 0.1, ball.velocity.y * 0.1)
 		p.setColor(rColor);
+		p.object.material.opacity = 1
+		p.opacity=1
 		p.setPosition(ball.position.x+random+offset.x, ball.position.y+random+offset.y)
 
 	}
