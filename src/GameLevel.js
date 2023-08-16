@@ -1,5 +1,5 @@
 import GameObject from "./GameObject"
-
+import * as THREE from 'three'
 const transPos = (width, height, pos) => {
 	const x = pos.x - width / 2;
 	const y = pos.y - height / 2;
@@ -28,14 +28,25 @@ export default class GameLevel {
 				if (this.tileData[y][x] === 1) {
 					const pos = { x: x * unit_width + unit_width /2, y: y * unit_height + unit_height/2 };
 					const size = {x: unit_width, y: unit_height}
-					const obj = new GameObject(transPos(this.width,this.totalHeight, pos),size, {x: 0,y:0}, "resources/textures/block_solid.png", this.scene)
+					const obj = new GameObject(transPos(this.width,this.totalHeight, pos),size, {x: 0,y:0}, "resources/textures/block_solid.png", this.scene, new THREE.Color(0.8,0.8,0.7))
 					obj.solid = true
 					this.bricks.push(obj)
 						obj.spriteRenderer.sprite.name='brick'
 				} else if (this.tileData[y][x] > 1) {
-						const pos = { x: x * unit_width + unit_width /2, y: y * unit_height + unit_height/2 };
-					const size = {x: unit_width, y: unit_height}
-					const obj = new GameObject(transPos(this.width,this.totalHeight, pos),size, {x: 0,y:0}, "resources/textures/block.png", this.scene)
+					let color;
+					if (this.tileData[y][x] === 2) {
+							color = new THREE.Color(0.2,0.6,1)
+					} else if (this.tileData[y][x] === 3) {
+						color = new THREE.Color(0,0.7,0)
+					} else if (this.tileData[y][x] === 4) {
+						color = new THREE.Color(0.8,0.8,0.4)
+					} else if (this.tileData[y][x] === 5) {
+						color = new THREE.Color(1,0.5,0)
+					} 
+					const pos = { x: x * unit_width + unit_width /2, y: y * unit_height + unit_height/2 };
+					const size = { x: unit_width, y: unit_height }
+					
+					const obj = new GameObject(transPos(this.width,this.totalHeight, pos),size, {x: 0,y:0}, "resources/textures/block.png", this.scene, color)
 					this.bricks.push(obj)
 					obj.spriteRenderer.sprite.name='brick'
 				}

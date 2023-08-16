@@ -2,12 +2,13 @@ import * as THREE from 'three'
 import SpriteRenderer from './SpriteRenderer'
 
 export default class GameObject {
-	constructor(position, size, velocity, texture, scene) {
+	constructor(position, size, velocity, texture, scene,color) {
 		this.position = position
 		this.size = size
 		this.velocity = velocity
 		this.scene = scene
 		this.texture = texture
+		this.color= color || new THREE.Color()
 		this.spriteRenderer = new SpriteRenderer(scene)
 		this.solid = false
 		this.isDestroyed = false
@@ -35,7 +36,7 @@ export default class GameObject {
 		this.spriteRenderer.sprite.position.y = y
 	}
 	draw() {
-		this.spriteRenderer.drawSprite(this.texture, this.position, this.size)
+		this.spriteRenderer.drawSprite(this.texture, this.position, this.size, this.color)
 	}
 
 	destroy() {

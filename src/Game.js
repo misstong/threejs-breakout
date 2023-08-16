@@ -33,6 +33,10 @@ function clamp(v, low, high) {
 	};
 }
 
+function length(v) {
+	return Math.sqrt(v.x * v.x + v.y * v.y);
+}
+
 function VectorDirection(target) {
 	const compass = [
 		{ x: 0, y: 1 },
@@ -112,15 +116,9 @@ class Game {
 		this.init()
 		this.addEventListener()
 		this.update()
-		console.log('---scene,', this.scene)
 	}
 
 	init() {
-// 		const geometry = new THREE.BoxGeometry( 100, 100, 100 );
-// const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-// 		const cube = new THREE.Mesh(geometry, material);
-// 		cube.position.set(0,0,0)
-// 		this.scene.add( cube );
 		this.background = new SpriteRenderer(this.scene)
 		this.background.drawSprite('resources/textures/background.jpg', {
 			x: 0,
@@ -140,7 +138,7 @@ class Game {
 		this.player.spriteRenderer.sprite.name = 'player'
 		this.readLevels()
 
-		const ballPos = {x: playerPos.x, y: playerPos.y - this.PLAYER_SIZE.y/2 - BALL_RADIUS/2 }
+		const ballPos = {x: playerPos.x, y: playerPos.y - this.PLAYER_SIZE.y/2 - BALL_RADIUS }
 		this.ball = new BallObject(transPos(this.width, this.height,ballPos),BALL_RADIUS, INITIAL_BALL_VELOCITY,'resources/textures/awesomeface.png',this.scene)
 		this.ball.spriteRenderer.sprite.name='ball'
 	}
@@ -187,7 +185,7 @@ class Game {
 				const collision = checkCollision(this.ball, brick);
 				
 				if (collision[0]) {
-					console.log('------coloii', collision)
+					// console.log('------coloii', collision)
 					if (!brick.solid) {
 						brick.isDestroyed = true;
 						brick.destroy()
@@ -197,6 +195,22 @@ class Game {
 					}
 				}
 			}
+		}
+		const result = checkCollision(this.ball, this.player)
+		if (!this.ball.stuck && result[0]) {
+			const distance = this.ball.position.x - this.player.position.x;
+			const percentage = distance / this.player.size.x * 2
+			const strength = 2
+
+			const oldlen = length(this.ball.velocity)
+			this.ball.velocity.x = strength * percentage * INITIAL_BALL_VELOCITY.x;
+			this.ball.velocity.y = -this.ball.velocity.y;
+
+			
+			const len = length(this.ball.velocity)
+			this.ball.velocity.x = this.ball.velocity.x / len * oldlen;
+			this.ball.velocity.y = this.ball.velocity.y / len * oldlen;
+			// this.ball.stuck = true
 		}
 	}
 
