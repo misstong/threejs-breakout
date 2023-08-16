@@ -6,6 +6,7 @@ import GameObject from './GameObject.js'
 import BallObject from './BallObject.js'
 import GameLevel from './GameLevel.js'
 import { LEVEL1, LEVEL2, LEVEL3} from './levels/levels.js'
+import { ParticleGenerator } from './ParticleGenerator.js'
 
 const  GameState = {
 	GAME_ACTIVE: 0,
@@ -140,7 +141,9 @@ class Game {
 
 		const ballPos = {x: playerPos.x, y: playerPos.y - this.PLAYER_SIZE.y/2 - BALL_RADIUS }
 		this.ball = new BallObject(transPos(this.width, this.height,ballPos),BALL_RADIUS, INITIAL_BALL_VELOCITY,'resources/textures/awesomeface.png',this.scene)
-		this.ball.spriteRenderer.sprite.name='ball'
+		this.ball.spriteRenderer.sprite.name = 'ball'
+		
+		this.particles = new ParticleGenerator('resources/textures/particle.png',500, this.scene)
 	}
 
 	readLevels() {
@@ -224,6 +227,7 @@ class Game {
 		// }
 		
 		const dt = this.clock.getDelta()
+		this.particles.update(dt, this.ball,2,{x: BALL_RADIUS/2, y: BALL_RADIUS/2})
 		this.processInput(dt) 
 		this.ball.move(dt, this.width, HEIGHT)
 		requestAnimationFrame(this.update.bind(this))
