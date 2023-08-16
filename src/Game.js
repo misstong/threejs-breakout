@@ -196,6 +196,29 @@ class Game {
 					} else {
 						// to add effect
 					}
+					const dir = collision[1]
+					const diff_vector = collision[2]
+					if (!(this.ball.passThrough && !brick.solid)) {
+						if (dir === Direction.LEFT || dir === Direction.RIGHT) {
+								this.ball.velocity.x = -this.ball.velocity.x
+								const penetration = BALL_RADIUS-Math.abs(diff_vector.x)
+							if (dir === Direction.LEFT) {
+								this.ball.position.x += penetration
+							} else {
+								this.ball.position.x -= penetration
+							}
+							this.ball.spriteRenderer.sprite.position.x = this.ball.position.x;
+						} else {
+							this.ball.velocity.y = -this.ball.velocity.y;
+							const penetration = BALL_RADIUS-Math.abs(diff_vector.y)
+							if (dir === Direction.UP) {
+								this.ball.position.y -= penetration
+							} else {
+								this.ball.position.y += penetration
+							}
+							this.ball.spriteRenderer.sprite.position.y = this.ball.position.y;
+						}
+					}
 				}
 			}
 		}
