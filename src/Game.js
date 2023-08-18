@@ -15,7 +15,7 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { PostProcessingShader } from './shaders/PostProcessingShader.js'
 import PowerUp from './PowerUp.js'
 import TextRenderer from './TextRenderer.js'
-
+import {SFX} from './SFX.js'
 const  GameState = {
 	GAME_ACTIVE: 0,
 	GAME_MENU: 1,
@@ -123,7 +123,7 @@ class Game {
 		this.shakeTime = 0;
 		this.powerUps = []
 		this.targetElement = _options.targetElement
-		this.state = GameState.GAME_ACTIVE
+		this.state = GameState.GAME_MENU
 		this.now = 0
 		this.Keys = {} // 表示当前什么键被按下
 		this.KeysProcessed = {} // 表示键是否被处理过，适用于只需要处理一次的case
@@ -136,6 +136,9 @@ class Game {
 		this.init()
 		this.addEventListener()
 		this.update()
+		// if (this.composer) {
+		// 	this.composer.render();
+		// }
 	}
 
 	init() {
@@ -166,7 +169,16 @@ class Game {
 		
 		this.particles = new ParticleGenerator('resources/textures/particle.png',500, this.scene)
 		this.textRenderer = new TextRenderer(this.width, this.height);
-
+		this.initSounds()
+	}
+	initSounds() {
+		this.listener = new THREE.AudioListener();
+		this.camera.get().add(this.listener);
+		this.sfx=new SFX(this.camera,'resources/audio/',this.listener)
+		this.sfx.load('bleep.mp3', 'bleep')
+		this.sfx.load('bleep.wav', 'bleep2')
+		this.sfx.load('powerup.wav', 'powerup')
+		this.sfx.load('breakout.mp3', 'breakout', true, 0.5, null, true)
 	}
 
 	readLevels() {
@@ -225,10 +237,12 @@ class Game {
 						brick.isDestroyed = true;
 						brick.destroy()
 						this.spawnPowerUps(brick)
+						this.sfx.play('bleep')
 					} else {
 						// to add effect
 						this.shakeTime = 0.05;
 						this.effects.uniforms.shake.value = true;
+						this.sfx.play('bleep')
 					}
 					const dir = collision[1]
 					const diff_vector = collision[2]
@@ -270,6 +284,7 @@ class Game {
 					powerUp.destroy();
 					powerUp.activated = true
 					this.activatePowerUp(powerUp)
+					this.sfx.play('powerup')
 				}
 			}
 		}
@@ -290,6 +305,7 @@ class Game {
 			this.ball.velocity.y = -this.ball.velocity.y;
 				// console.log('-----collison velociry, percentage', percentage,this.ball.velocity )
 			this.ball.stuck = this.ball.sticky
+			this.sfx.play('bleep2')
 		}
 	}
 	activatePowerUp(powerUp) {
@@ -320,20 +336,19 @@ class Game {
 
 	update() {
 		if (this.state === GameState.GAME_MENU) {
-			this.textRenderer.render('Press Enter to start')
+			this.textRenderer.render('Press Enter to start <br/>空格键发球,AD键左右移动')
 		} else if (this.state === GameState.GAME_WIN) {
 			this.textRenderer.render('Congratulations! You win!')
 		}
 		const dt = this.clock.getDelta()
 		this.now += dt
 		this.processInput(dt) 
+		if (this.renderer) {
+			// this.renderer.render(this.scene, this.camera.get())
+			this.effects.uniforms.time.value = this.now;
+			this.composer.render();
+		}
 		if (this.state === GameState.GAME_ACTIVE) {
-			if (this.renderer) {
-				// this.renderer.render(this.scene, this.camera.get())
-				this.effects.uniforms.time.value = this.now;
-				this.composer.render();
-			}
-
 			this.doCollisions()	
 			if (this.shakeTime > 0) {
 				this.shakeTime -= dt;
@@ -438,23 +453,23 @@ class Game {
 		return rand === 0
 	}
 	spawnPowerUps(block) {
-		if (this.shouldSpawn(75)) {
-			this.powerUps.push(new PowerUp('speed', 0.3, block.position,'resources/textures/powerup_speed.png', this.scene, new THREE.Color(0.5, 0.5, 1)))
+		if (this.shouldSpawn(15)) {
+			this.powerUps.push(new PowerUp('speed', 5, block.position,'resources/textures/powerup_speed.png', this.scene, new THREE.Color(0.5, 0.5, 1)))
 		}
-		if (this.shouldSpawn(75)) {
-				this.powerUps.push(new PowerUp('sticky', 20, block.position,'resources/textures/powerup_sticky.png', this.scene, new THREE.Color(1, 0.5, 1)))
+		if (this.shouldSpawn(15)) {
+				this.powerUps.push(new PowerUp('sticky', 5, block.position,'resources/textures/powerup_sticky.png', this.scene, new THREE.Color(1, 0.5, 1)))
 		}
-		if (this.shouldSpawn(75)) {
+		if (this.shouldSpawn(15)) {
 				this.powerUps.push(new PowerUp('pass-through', 10, block.position,'resources/textures/powerup_passthrough.png', this.scene, new THREE.Color(0.5, 1, 0.5)))
 		}
-		if (this.shouldSpawn(75)) {
-				this.powerUps.push(new PowerUp('pad-size-increase', 0.5, block.position,'resources/textures/powerup_increase.png', this.scene, new THREE.Color(1, 0.6, 0.4)))
+		if (this.shouldSpawn(15)) {
+				this.powerUps.push(new PowerUp('pad-size-increase', 7, block.position,'resources/textures/powerup_increase.png', this.scene, new THREE.Color(1, 0.6, 0.4)))
 		}
 		if (this.shouldSpawn(15)) {
 			this.powerUps.push(new PowerUp('confuse', 15, block.position,'resources/textures/powerup_confuse.png', this.scene, new THREE.Color(1, 0.3, 0.3)))
 		}
 		if (this.shouldSpawn(15)) {
-				this.powerUps.push(new PowerUp('chaos', 15, block.position,'resources/textures/powerup_chaos.png', this.scene, new THREE.Color(0.9, 0.25, 0.25)))
+				this.powerUps.push(new PowerUp('chaos', 5, block.position,'resources/textures/powerup_chaos.png', this.scene, new THREE.Color(0.9, 0.25, 0.25)))
 		}
 	}
 
@@ -506,7 +521,7 @@ class Game {
 					} else if (powerUp.type === 'pad-size-increase') {
 						if (!this.isOtherPowerUpActivated('pad-size-increase')) {
 							this.player.size.x -= 50;
-							this.player.spriteRenderer.sprite.scale.x = this.player.size.x;
+							this.player.spriteRenderer.sprite.scale.set( this.player.size.x,20 ,1);
 						}
 					}
 				}

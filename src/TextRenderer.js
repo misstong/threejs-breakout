@@ -11,6 +11,7 @@ export default class TextRenderer{
 		this.dom.style.zIndex=100
 		this.dom.style.transform='translateX(-50%)'
 		this.dom.style.color='red'
+		this.dom.style.textAlign='center'
 		// this.dom.innerHTML = 'test'
 		document.body.appendChild(this.dom)
 	}
