@@ -110,6 +110,7 @@ class Game {
 		this.height = _options.height || 600
 		this.levels = []
 		this.level = 0
+		this.shakeTime = 0;
 		this.targetElement = _options.targetElement
 		this.state = GameState.GAME_ACTIVE
 		this.Keys = {} // 表示当前什么键被按下
@@ -211,6 +212,8 @@ class Game {
 
 					} else {
 						// to add effect
+						this.shakeTime = 0.05;
+						this.effects.uniforms.shake.value = true;
 					}
 					const dir = collision[1]
 					const diff_vector = collision[2]
@@ -262,11 +265,15 @@ class Game {
 			this.composer.render();
 		}
 		this.doCollisions()
-		// if (this.levels.length) {
-		// 	this.levels[this.level].update()
-		// }
 		
 		const dt = this.clock.getDelta()
+		if (this.shakeTime > 0) {
+			this.shakeTime -= dt;
+			if (this.shakeTime <= 0) {
+				this.effects.uniforms.shake.value = false;
+			}
+		}
+
 		this.particles.update(dt, this.ball,2,{x: BALL_RADIUS/2, y: BALL_RADIUS/2})
 		this.processInput(dt) 
 		this.ball.move(dt, this.width, HEIGHT)
