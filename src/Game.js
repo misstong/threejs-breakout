@@ -314,13 +314,17 @@ class Game {
 	}
 
 	update() {
+		const now = this.clock.getElapsedTime();
+		const dt = this.clock.getDelta()
 		if (this.renderer) {
 			// this.renderer.render(this.scene, this.camera.get())
+			this.effects.uniforms.time.value = now;
 			this.composer.render();
+			
 		}
 		this.doCollisions()
 		
-		const dt = this.clock.getDelta()
+		
 		if (this.shakeTime > 0) {
 			this.shakeTime -= dt;
 			if (this.shakeTime <= 0) {
@@ -328,10 +332,15 @@ class Game {
 			}
 		}
 		this.updatePowerUps(dt)
-
 		this.particles.update(dt, this.ball,2,{x: BALL_RADIUS/2, y: BALL_RADIUS/2})
 		this.processInput(dt) 
 		this.ball.move(dt, this.width, HEIGHT)
+		if (this.ball.position.y < -this.height / 2) {
+			this.state = GameState.GAME_MENU
+		}
+		if (this.state === GameState.GAME_ACTIVE && this.levels[this.level].isCompleted()) {
+			this.state = GameState.GAME_WIN
+		}
 		requestAnimationFrame(this.update.bind(this))
 	}
 
@@ -390,6 +399,17 @@ class Game {
 				// this.scene.remove(this.player.spriteRenderer.sprite)
 			}	
 		}
+		if (this.state == GameState.GAME_MENU) {
+			if (this.Keys['KeyEnter'] && !this.KeysProcessed['KeyEnter']) {
+				this.state = GameState.GAME_ACTIVE
+			}
+		}
+		if (this.state === GameState.GAME_WIN) {
+			if (this.Keys['KeyEnter']) {
+				this.state = GameState.GAME_MENU;
+			}
+		}
+
 	}
 
 
