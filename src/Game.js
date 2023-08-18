@@ -8,6 +8,12 @@ import GameLevel from './GameLevel.js'
 import { LEVEL1, LEVEL2, LEVEL3} from './levels/levels.js'
 import { ParticleGenerator } from './ParticleGenerator.js'
 
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+// import { OutputPass } from 'three/examples/js/postprocessing/OutputPass.js';
+import { PostProcessingShader } from './shaders/PostProcessingShader.js'
+
 const  GameState = {
 	GAME_ACTIVE: 0,
 	GAME_MENU: 1,
@@ -179,7 +185,17 @@ class Game {
 	{
 			this.renderer = new Renderer({ rendererInstance: this.rendererInstance })
 			// this.renderer.get().setViewport(0,0,this.width,this.height)
-			this.targetElement.appendChild(this.renderer.getDomElement())
+		this.targetElement.appendChild(this.renderer.getDomElement())
+		
+		this.composer = new EffectComposer(this.renderer.get())
+
+		this.renderPass = new RenderPass(this.scene, this.camera.get())
+
+		this.composer.addPass(this.renderPass)
+		this.effects = new ShaderPass(PostProcessingShader)
+		this.effects.renderToScreen = true
+		this.composer.addPass(this.effects)
+		// this.composer.addPass(new OutputPass())
 	}
 	
 	doCollisions() {
@@ -242,7 +258,8 @@ class Game {
 
 	update() {
 		if (this.renderer) {
-			this.renderer.render(this.scene, this.camera.get())
+			// this.renderer.render(this.scene, this.camera.get())
+			this.composer.render();
 		}
 		this.doCollisions()
 		// if (this.levels.length) {
