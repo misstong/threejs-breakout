@@ -38,6 +38,9 @@ export default class GameObject {
 	draw() {
 		this.spriteRenderer.drawSprite(this.texture, this.position, this.size, this.color)
 	}
+	updateColor(color) {
+		this.spriteRenderer.sprite.material.color.set(color)
+	}
 
 	destroy() {
 		if (this.physicallyRemoved) {
@@ -45,7 +48,7 @@ export default class GameObject {
 		}
 		
 		if (this.isDestroyed) {
-			console.log('---game obj destroy', this.scene, this.spriteRenderer.sprite)
+			// console.log('---game obj destroy', this.scene, this.spriteRenderer.sprite)
 			this.scene.remove(this.spriteRenderer.sprite)
 
 				this.physicallyRemoved = true

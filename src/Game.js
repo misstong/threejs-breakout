@@ -13,6 +13,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 // import { OutputPass } from 'three/examples/js/postprocessing/OutputPass.js';
 import { PostProcessingShader } from './shaders/PostProcessingShader.js'
+import PowerUp from './PowerUp.js'
 
 const  GameState = {
 	GAME_ACTIVE: 0,
@@ -96,7 +97,15 @@ function checkCollision(ball, other) {
 
 }
 
+function checkAABBCollision(one, other) {
+	const collisionX = one.position.x + one.size.x >= other.position.x && one.position.x <= other.position.x + other.size.x
+	const collisionY = one.position.y + one.size.y >= other.position.y && one.position.y <= other.position.y + other.size.y
+	return collisionX && collisionY
+}
 
+	function getRandomInt(max) {
+  return Math.floor(Math.random() * max);
+}
 
 export const WIDTH = 800
 export const HEIGHT = 600
@@ -111,6 +120,7 @@ class Game {
 		this.levels = []
 		this.level = 0
 		this.shakeTime = 0;
+		this.powerUps = []
 		this.targetElement = _options.targetElement
 		this.state = GameState.GAME_ACTIVE
 		this.Keys = {} // 表示当前什么键被按下
@@ -147,7 +157,7 @@ class Game {
 		this.readLevels()
 
 		const ballPos = {x: playerPos.x, y: playerPos.y - this.PLAYER_SIZE.y/2 - BALL_RADIUS }
-		this.ball = new BallObject(transPos(this.width, this.height,ballPos),BALL_RADIUS, INITIAL_BALL_VELOCITY,'resources/textures/awesomeface.png',this.scene)
+		this.ball = new BallObject(transPos(this.width, this.height, ballPos), BALL_RADIUS, { ...INITIAL_BALL_VELOCITY },'resources/textures/awesomeface.png',this.scene)
 		this.ball.spriteRenderer.sprite.name = 'ball'
 		
 		this.particles = new ParticleGenerator('resources/textures/particle.png',500, this.scene)
@@ -209,7 +219,7 @@ class Game {
 					if (!brick.solid) {
 						brick.isDestroyed = true;
 						brick.destroy()
-
+						this.spawnPowerUps(brick)
 					} else {
 						// to add effect
 						this.shakeTime = 0.05;
@@ -241,21 +251,65 @@ class Game {
 				}
 			}
 		}
+
+		// power up
+		for (let powerUp of this.powerUps) {
+			if (!powerUp.isDestroyed) {
+				if (powerUp.position.y < -this.height / 2) {
+					powerUp.isDestroyed = true;
+					powerUp.destroy()
+				}
+
+				if (checkAABBCollision(this.player, powerUp)) {
+					powerUp.isDestroyed = true;
+					powerUp.destroy();
+					powerUp.activated = true
+					this.activatePowerUp(powerUp)
+				}
+			}
+		}
+
 		const result = checkCollision(this.ball, this.player)
 		if (!this.ball.stuck && result[0]) {
 			const distance = this.ball.position.x - this.player.position.x;
 			const percentage = distance / this.player.size.x * 2
 			const strength = 2
 
-			const oldlen = length(this.ball.velocity)
+			// const oldlen = length(this.ball.velocity)
+			// console.log('-----INITIAL_BALL_VELOCITY',INITIAL_BALL_VELOCITY )
 			this.ball.velocity.x = strength * percentage * INITIAL_BALL_VELOCITY.x;
-			this.ball.velocity.y = -this.ball.velocity.y;
-
 			
-			const len = length(this.ball.velocity)
-			this.ball.velocity.x = this.ball.velocity.x / len * oldlen;
-			this.ball.velocity.y = this.ball.velocity.y / len * oldlen;
-			// this.ball.stuck = true
+			// const len = length(this.ball.velocity)
+			// this.ball.velocity.x = this.ball.velocity.x / len * oldlen;
+			// this.ball.velocity.y = this.ball.velocity.y / len * oldlen;
+			this.ball.velocity.y = -this.ball.velocity.y;
+				// console.log('-----collison velociry, percentage', percentage,this.ball.velocity )
+			this.ball.stuck = this.ball.sticky
+		}
+	}
+	activatePowerUp(powerUp) {
+		if (powerUp.type === 'speed') {
+			this.ball.velocity.y *= 1.2
+		}
+		else if (powerUp.type === 'sticky') {
+			this.ball.sticky = true;
+			this.player.updateColor(new THREE.Color(1, 0.5, 1))
+		} else if (powerUp.type === 'pass-through') {
+			this.ball.passThrough = true
+			this.ball.updateColor(new THREE.Color(1, 0.5, 0.5))
+		} else if (powerUp.type === "pad-size-increase") {
+			this.player.size.x += 50
+			this.player.spriteRenderer.sprite.scale.x = this.player.size.x;
+		} else if (powerUp.type === "confuse") {
+			if (!this.effects.chaos) {
+				this.effects.uniforms.confuse.value = true;
+				this.effects.confuse = true
+			}
+		} else if (powerUp.type === 'chaos') {
+			if (!this.effects.confuse) {
+				this.effects.uniforms.chaos.value = true;
+				this.effects.chaos = true;
+			}
 		}
 	}
 
@@ -273,6 +327,7 @@ class Game {
 				this.effects.uniforms.shake.value = false;
 			}
 		}
+		this.updatePowerUps(dt)
 
 		this.particles.update(dt, this.ball,2,{x: BALL_RADIUS/2, y: BALL_RADIUS/2})
 		this.processInput(dt) 
@@ -334,6 +389,88 @@ class Game {
 				this.ball.stuck = false
 				// this.scene.remove(this.player.spriteRenderer.sprite)
 			}	
+		}
+	}
+
+
+	shouldSpawn(chance) {
+		const rand = getRandomInt(chance);
+		return rand === 0
+	}
+	spawnPowerUps(block) {
+		if (this.shouldSpawn(75)) {
+			this.powerUps.push(new PowerUp('speed', 0.3, block.position,'resources/textures/powerup_speed.png', this.scene, new THREE.Color(0.5, 0.5, 1)))
+		}
+		if (this.shouldSpawn(75)) {
+				this.powerUps.push(new PowerUp('sticky', 20, block.position,'resources/textures/powerup_sticky.png', this.scene, new THREE.Color(1, 0.5, 1)))
+		}
+		if (this.shouldSpawn(75)) {
+				this.powerUps.push(new PowerUp('pass-through', 10, block.position,'resources/textures/powerup_passthrough.png', this.scene, new THREE.Color(0.5, 1, 0.5)))
+		}
+		if (this.shouldSpawn(75)) {
+				this.powerUps.push(new PowerUp('pad-size-increase', 0.5, block.position,'resources/textures/powerup_increase.png', this.scene, new THREE.Color(1, 0.6, 0.4)))
+		}
+		if (this.shouldSpawn(15)) {
+			this.powerUps.push(new PowerUp('confuse', 15, block.position,'resources/textures/powerup_confuse.png', this.scene, new THREE.Color(1, 0.3, 0.3)))
+		}
+		if (this.shouldSpawn(15)) {
+				this.powerUps.push(new PowerUp('chaos', 15, block.position,'resources/textures/powerup_chaos.png', this.scene, new THREE.Color(0.9, 0.25, 0.25)))
+		}
+	}
+
+	isOtherPowerUpActivated(type) {
+		for (let power of this.powerUps) {
+			if (power.activated) {
+				if (power.type === type) {
+					return true;
+				}
+			}
+		}
+		return false
+	}
+
+	updatePowerUps(dt) {
+		for (let i = 0; i < this.powerUps.length; i++) {
+			let powerUp = this.powerUps[i];
+			powerUp.update({x: powerUp.velocity.x *dt, y: powerUp.velocity.y *dt});
+			if (powerUp.activated) {
+				powerUp.duration -= dt;
+				if (powerUp.duration <= 0) {
+					powerUp.activated = false
+					if (powerUp.type === 'sticky') {
+						if (!this.isOtherPowerUpActivated('sticky')) {
+							this.ball.sticky = false;
+							this.player.updateColor(new THREE.Color(1,1,1))
+						} 
+					} else if (powerUp.type === 'pass-through') {
+						if (!this.isOtherPowerUpActivated('pass-through')) {
+							this.ball.passThrough = false;
+							this.ball.updateColor(new THREE.Color(1,1,1))
+						}
+					} else if (powerUp.type === 'confuse') {
+						if (!this.isOtherPowerUpActivated('confuse')) {
+							this.effects.confuse = false;
+							this.effects.uniforms.confuse.value = false;
+						}
+					}
+					else if (powerUp.type === 'chaos') {
+						if (!this.isOtherPowerUpActivated('chaos')) {
+							this.effects.chaos = false;
+							this.effects.uniforms.chaos.value = false;
+						}
+					} else if (powerUp.type === 'speed') {
+						if (!this.isOtherPowerUpActivated('speed')) {
+							this.ball.velocity.y = this.ball.velocity.y / 1.2
+							
+						}
+					} else if (powerUp.type === 'pad-size-increase') {
+						if (!this.isOtherPowerUpActivated('pad-size-increase')) {
+							this.player.size.x -= 50;
+							this.player.spriteRenderer.sprite.scale.x = this.player.size.x;
+						}
+					}
+				}
+			}
 		}
 	}
 
