@@ -124,6 +124,7 @@ class Game {
 		this.powerUps = []
 		this.targetElement = _options.targetElement
 		this.state = GameState.GAME_ACTIVE
+		this.now = 0
 		this.Keys = {} // 表示当前什么键被按下
 		this.KeysProcessed = {} // 表示键是否被处理过，适用于只需要处理一次的case
 		this.clock = new THREE.Clock()
@@ -151,6 +152,7 @@ class Game {
 		this.background.sprite.name = 'back'
 		this.PLAYER_SIZE = { x: 100, y: 20 }
 		const playerPos = { x: this.width / 2 , y: this.height - this.PLAYER_SIZE.y }
+		this.playerPos = playerPos;
 		this.player = new GameObject(transPos(this.width, this.height,playerPos),
 			this.PLAYER_SIZE, {x: 0, y: 0}, 'resources/textures/paddle.png', this.scene
 		)
@@ -158,6 +160,7 @@ class Game {
 		this.readLevels()
 
 		const ballPos = {x: playerPos.x, y: playerPos.y - this.PLAYER_SIZE.y/2 - BALL_RADIUS }
+		this.ballPos = ballPos
 		this.ball = new BallObject(transPos(this.width, this.height, ballPos), BALL_RADIUS, { ...INITIAL_BALL_VELOCITY },'resources/textures/awesomeface.png',this.scene)
 		this.ball.spriteRenderer.sprite.name = 'ball'
 		
@@ -197,8 +200,7 @@ class Game {
 	
 	setRenderer()
 	{
-			this.renderer = new Renderer({ rendererInstance: this.rendererInstance })
-			// this.renderer.get().setViewport(0,0,this.width,this.height)
+		this.renderer = new Renderer({ rendererInstance: this.rendererInstance })
 		this.targetElement.appendChild(this.renderer.getDomElement())
 		
 		this.composer = new EffectComposer(this.renderer.get())
@@ -317,36 +319,37 @@ class Game {
 	}
 
 	update() {
-		const now = this.clock.getElapsedTime();
-		const dt = this.clock.getDelta()
-		if (this.renderer) {
-			// this.renderer.render(this.scene, this.camera.get())
-			this.effects.uniforms.time.value = now;
-			this.composer.render();
-			
-		}
 		if (this.state === GameState.GAME_MENU) {
 			this.textRenderer.render('Press Enter to start')
 		} else if (this.state === GameState.GAME_WIN) {
 			this.textRenderer.render('Congratulations! You win!')
 		}
-		this.doCollisions()
-		
-		if (this.shakeTime > 0) {
-			this.shakeTime -= dt;
-			if (this.shakeTime <= 0) {
-				this.effects.uniforms.shake.value = false;
-			}
-		}
-		this.updatePowerUps(dt)
-		this.particles.update(dt, this.ball,2,{x: BALL_RADIUS/2, y: BALL_RADIUS/2})
+		const dt = this.clock.getDelta()
+		this.now += dt
 		this.processInput(dt) 
-		this.ball.move(dt, this.width, HEIGHT)
-		if (this.ball.position.y < -this.height / 2) {
-			this.state = GameState.GAME_MENU
-		}
-		if (this.state === GameState.GAME_ACTIVE && this.levels[this.level].isCompleted()) {
-			this.state = GameState.GAME_WIN
+		if (this.state === GameState.GAME_ACTIVE) {
+			if (this.renderer) {
+				// this.renderer.render(this.scene, this.camera.get())
+				this.effects.uniforms.time.value = this.now;
+				this.composer.render();
+			}
+
+			this.doCollisions()	
+			if (this.shakeTime > 0) {
+				this.shakeTime -= dt;
+				if (this.shakeTime <= 0) {
+					this.effects.uniforms.shake.value = false;
+				}
+			}
+			this.updatePowerUps(dt)
+			this.particles.update(dt, this.ball,2,{x: BALL_RADIUS/2, y: BALL_RADIUS/2})	
+			this.ball.move(dt, this.width, HEIGHT)
+			if (this.ball.position.y < -this.height / 2) {
+				this.state = GameState.GAME_MENU
+			}
+			if (this.state === GameState.GAME_ACTIVE && this.levels[this.level].isCompleted()) {
+				this.state = GameState.GAME_WIN
+			}
 		}
 		requestAnimationFrame(this.update.bind(this))
 	}
@@ -406,8 +409,10 @@ class Game {
 				// this.scene.remove(this.player.spriteRenderer.sprite)
 			}	
 		}
-		if (this.state == GameState.GAME_MENU) {
-			if (this.Keys['KeyEnter'] && !this.KeysProcessed['KeyEnter']) {
+		console.log('state', this.state===GameState.GAME_MENU)
+		if (this.state === GameState.GAME_MENU) {
+			if (this.Keys['Enter'] && !this.KeysProcessed['Enter']) {
+				this.resetGame()
 				this.state = GameState.GAME_ACTIVE
 				this.textRenderer.hide()
 			}
@@ -418,6 +423,13 @@ class Game {
 			}
 		}
 
+	}
+
+	resetGame() {
+		this.player.updatePosition(	transPos(this.width, this.height,this.playerPos)	)
+		this.ball.updatePosition(transPos(this.width, this.height, this.ballPos))
+		this.ball.velocity = { ...INITIAL_BALL_VELOCITY }
+		this.ball.stuck = true
 	}
 
 

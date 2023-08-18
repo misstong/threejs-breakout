@@ -19,8 +19,8 @@ export const PostProcessingShader = {
 				
 				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
 				if(chaos){
-					float strength = 0.3;
-					vec2 pos = vec2(uv.x+sin(time) * strength, uv.y + cos(time) * strength);
+					float strength = 0.03;
+					vec2 pos = vec2(uv.x+sin(5.0* time) * strength, uv.y + cos(5.0*time) * strength);
 					vUv = pos;
 
 				} else if(confuse) {

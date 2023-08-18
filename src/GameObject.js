@@ -41,6 +41,11 @@ export default class GameObject {
 	updateColor(color) {
 		this.spriteRenderer.sprite.material.color.set(color)
 	}
+	updatePosition(pos) {
+		this.setX(pos.x)
+		this.setY(pos.y)
+
+	}
 
 	destroy() {
 		if (this.physicallyRemoved) {
