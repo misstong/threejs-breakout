@@ -14,6 +14,7 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 // import { OutputPass } from 'three/examples/js/postprocessing/OutputPass.js';
 import { PostProcessingShader } from './shaders/PostProcessingShader.js'
 import PowerUp from './PowerUp.js'
+import TextRenderer from './TextRenderer.js'
 
 const  GameState = {
 	GAME_ACTIVE: 0,
@@ -161,6 +162,8 @@ class Game {
 		this.ball.spriteRenderer.sprite.name = 'ball'
 		
 		this.particles = new ParticleGenerator('resources/textures/particle.png',500, this.scene)
+		this.textRenderer = new TextRenderer(this.width, this.height);
+
 	}
 
 	readLevels() {
@@ -322,8 +325,12 @@ class Game {
 			this.composer.render();
 			
 		}
+		if (this.state === GameState.GAME_MENU) {
+			this.textRenderer.render('Press Enter to start')
+		} else if (this.state === GameState.GAME_WIN) {
+			this.textRenderer.render('Congratulations! You win!')
+		}
 		this.doCollisions()
-		
 		
 		if (this.shakeTime > 0) {
 			this.shakeTime -= dt;
@@ -402,6 +409,7 @@ class Game {
 		if (this.state == GameState.GAME_MENU) {
 			if (this.Keys['KeyEnter'] && !this.KeysProcessed['KeyEnter']) {
 				this.state = GameState.GAME_ACTIVE
+				this.textRenderer.hide()
 			}
 		}
 		if (this.state === GameState.GAME_WIN) {
