@@ -114,6 +114,12 @@ const PLAYER_VELOCITY = 500;
 const BALL_RADIUS = 12
 
 const INITIAL_BALL_VELOCITY = { x: 100, y: 350.0 };
+
+const start = document.querySelector('.start')
+const kick = document.querySelector('.kick')
+const left = document.querySelector('.left')
+const right = document.querySelector('.right')
+let hasShown = false
 class Game {
 	constructor(_options = {}) {
 		this.width = _options.width || 800
@@ -315,11 +321,12 @@ class Game {
 		else if (powerUp.type === 'sticky') {
 			this.ball.sticky = true;
 			this.player.updateColor(new THREE.Color(1, 0.5, 1))
+			
 		} else if (powerUp.type === 'pass-through') {
 			this.ball.passThrough = true
 			this.ball.updateColor(new THREE.Color(1, 0.5, 0.5))
 		} else if (powerUp.type === "pad-size-increase") {
-			this.player.size.x += 50
+			this.player.size.x +=  50
 			this.player.spriteRenderer.sprite.scale.x = this.player.size.x;
 		} else if (powerUp.type === "confuse") {
 			if (!this.effects.chaos) {
@@ -427,16 +434,18 @@ class Game {
 				}
 			}
 			if (this.Keys['Space']) {
+				console.log('process space')
 				this.ball.stuck = false
 				// this.scene.remove(this.player.spriteRenderer.sprite)
 			}	
 		}
-		console.log('state', this.state===GameState.GAME_MENU)
+		// console.log('state',this.Keys, this.state===GameState.GAME_MENU)
 		if (this.state === GameState.GAME_MENU) {
 			if (this.Keys['Enter'] && !this.KeysProcessed['Enter']) {
 				this.resetGame()
 				this.state = GameState.GAME_ACTIVE
 				this.textRenderer.hide()
+				hideTips()
 			}
 		}
 		if (this.state === GameState.GAME_WIN) {
@@ -526,10 +535,10 @@ class Game {
 							
 						}
 					} else if (powerUp.type === 'pad-size-increase') {
-						if (!this.isOtherPowerUpActivated('pad-size-increase')) {
+						// if (!this.isOtherPowerUpActivated('pad-size-increase')) {
 							this.player.size.x -= 50;
 							this.player.spriteRenderer.sprite.scale.set( this.player.size.x,20 ,1);
-						}
+						// }
 					}
 				}
 			}
@@ -544,27 +553,23 @@ window.mobileCheck = function() {
   return check;
 };
 
-const start = document.querySelector('.start')
-const kick = document.querySelector('.kick')
-const left = document.querySelector('.left')
-const right = document.querySelector('.right')
-let hasShown = false
+
 function showMobileTips() {
 	if (hasShown) {
 		return
 	}
 	start.style.opacity = 1;
-	kick.style.opacity = 1;
 	hasShown = true
+}
+function hideTips() {
+	start.style.opacity=0;
+	hasShown = false
 }
 const game = new Game({
 	targetElement: document.querySelector('.experience'),
 	width: WIDTH,
 	height: HEIGHT
 })
-
-
-
 
 
 document.addEventListener('DOMContentLoaded', e => {
@@ -579,17 +584,16 @@ document.addEventListener('DOMContentLoaded', e => {
 		start.addEventListener('touchstart', e=> {
 			game.Keys['Enter'] = true
 			start.style.opacity=0
+			hasShown = false
 		})
 		start.addEventListener('touchend', e=> {
 			game.Keys['Enter'] = false;
 			game.KeysProcessed['Enter'] = false
 
 		})
-
 		kick.addEventListener('touchstart', e=> {
 			game.Keys['Space'] = true;
-			kick.style.opacity=0
-			hasShown = false
+			console.log('kick', game.Keys)
 		})
 		kick.addEventListener('touchend', e=> {
 			game.Keys['Space'] = false;
